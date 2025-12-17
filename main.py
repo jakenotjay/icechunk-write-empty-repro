@@ -98,7 +98,7 @@ async def main():
     # now we can write one chunk of purely NaNs
     nan_array = np.full(template.data.shape, np.nan)
 
-    new_ds = xr.Dataset(
+    nan_ds = xr.Dataset(
         {
             "foo": (
                 (y_dim, x_dim),
@@ -112,13 +112,49 @@ async def main():
     region = {y_dim: slice(0, 500), x_dim: slice(0, 500)}
 
     to_icechunk(
-        new_ds.drop_vars("spatial_ref", errors="ignore"), session_2, region=region
+        nan_ds.drop_vars("spatial_ref", errors="ignore"), session_2, region=region
     )
 
     session_2.commit("Write NaNs")
 
     written_chunk_set_2 = await get_written_chunk_set(repo)
     print(f"Number of written chunks: {len(written_chunk_set_2)}")
+
+    session_3 = repo.writable_session("main")
+
+    rand_array = np.random.randint(0, 100, (500, 500))
+    rand_ds = xr.Dataset(
+        {
+            "foo": (
+                (y_dim, x_dim),
+                rand_array,
+                {"grid_mapping": "spatial_ref"},
+            )
+        },
+        coords=coords,
+    )
+
+    to_icechunk(
+        rand_ds.drop_vars("spatial_ref", errors="ignore"), session_3, region=region
+    )
+    session_3.commit("Write random data")
+
+    written_chunk_set_3 = await get_written_chunk_set(repo)
+    print(f"Number of written chunks: {len(written_chunk_set_3)}")
+
+    storage_2 = ic.in_memory_storage()
+    repo_2 = ic.Repository.create(storage_2)
+    session_4 = repo_2.writable_session("main")
+
+    to_icechunk(
+        nan_ds.drop_vars("spatial_ref", errors="ignore"),
+        session_4,
+        encoding=band_encoding,
+    )
+
+    session_4.commit("Write random data with encoding (fresh array)")
+    written_chunk_set_4 = await get_written_chunk_set(repo_2)
+    print(f"Number of written chunks: {len(written_chunk_set_4)}")
 
 
 if __name__ == "__main__":
