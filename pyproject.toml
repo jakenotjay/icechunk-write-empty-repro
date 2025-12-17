@@ -1,0 +1,15 @@
+[project]
+name = "write-empty-repo"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+requires-python = ">=3.12"
+dependencies = [
+    "dask[distributed]>=2025.12.0",
+    "icechunk>=1.1.14",
+    "numpy>=2.3.5",
+    "odc-geo>=0.5.0",
+    "pyproj>=3.7.2",
+    "shapely>=2.1.2",
+    "xarray>=2025.12.0",
+]
