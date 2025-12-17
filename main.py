@@ -152,7 +152,7 @@ async def main():
         encoding=band_encoding,
     )
 
-    session_4.commit("Write random data with encoding (fresh array)")
+    session_4.commit("Write NaNs with encoding")
     written_chunk_set_4 = await get_written_chunk_set(repo_2)
     print(f"Number of written chunks: {len(written_chunk_set_4)}")
 
